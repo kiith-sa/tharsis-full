@@ -1,0 +1,12 @@
+/entity/unittest.o
+meta/*
+*.directory
+*.bkp
+*.bkp?
+/unittest
+/cdc.o
+*.log
+*.aux
+*.dub*
+__test__library__
+*.a
