@@ -10,7 +10,7 @@
         "dyaml" : { "version" : "~>0.5.0" },
         "tharsis-core" : { "version" : "~>0.1.0", "path" : "../tharsis-core" } 
     },
-    "homepage": "https://github.com/kiith-sa/Tharsis",
+    "homepage": "https://github.com/kiith-sa/tharsis-full",
     "copyright": "Copyright © 2013-2014, Ferdinand Majerech",
 
     "buildTypes":
