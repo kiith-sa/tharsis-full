@@ -12,7 +12,6 @@ import tharsis.entity.entityprototype;
 public import tharsis.entity.lifecomponent;
 import tharsis.entity.resourcemanager;
 
-
 /// Contains data about an entity to spawn.
 ///
 /// Condition to trigger the spawn is represented by a TimedSpawnConditionMultiComponent
@@ -30,7 +29,7 @@ struct SpawnerMultiComponent
     /// Cheap enough and won't be exceeded in most cases.
     enum minPrealloc = 4096;
 
-    /// Assume a third of entities can spawn (e.g. entities with weapons).
+    /// Assume a third of entities can spawn other entities (e.g. entities with weapons).
     enum minPreallocPerEntity = 0.3;
 
     /// Resource handle to the prototype of the entity to spawn.
