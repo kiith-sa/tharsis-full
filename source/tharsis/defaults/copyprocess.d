@@ -28,11 +28,12 @@ public:
     alias ComponentType FutureComponent;
 
     /// Takes a past components and copies it to a future version.
-    void process(ref immutable(ComponentType) past, out ComponentType future)
+    void process(ref immutable(ComponentType) past, out ComponentType future) nothrow
     {
         future = past;
         import std.stdio;
-        if(printComponents_) { writeln(past); }
+        import std.exception: assumeWontThrow;
+        if(printComponents_) { writeln(past).assumeWontThrow; }
     }
 
     /// If set to true, every processed component will be printed to stdout.
@@ -63,8 +64,7 @@ public:
     alias ComponentType FutureComponent;
 
     /// Takes a past components and copies it to a future version.
-    void process(immutable ComponentType[] past,
-                 ref ComponentType[] future)
+    void process(immutable ComponentType[] past, ref ComponentType[] future) nothrow
     {
         future   = future[0 .. past.length];
         future[] = past[];

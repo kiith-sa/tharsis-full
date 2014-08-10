@@ -52,7 +52,7 @@ public:
     ///         outMulti = The future TestMultiComponent.
     void process(ref const LifeComponent life, 
                  const TestMultiComponent[] multi,
-                 ref TestMultiComponent[] outMulti)
+                 ref TestMultiComponent[] outMulti) nothrow
     {
         outMulti = outMulti[0 .. multi.length];
         outMulti[] = multi[];
@@ -76,7 +76,7 @@ public:
     alias TimeoutComponent FutureComponent;
 
     void process(ref const TimeoutComponent timeout, 
-                 ref TimeoutComponent* outTimeout)
+                 ref TimeoutComponent* outTimeout) nothrow
     {
         if(timeout.removeIn == 0)
         {
@@ -91,7 +91,7 @@ public:
 
     void process(ref const TimeoutComponent timeout, 
                  ref const PhysicsComponent physics,
-                 ref TimeoutComponent* outTimeout)
+                 ref TimeoutComponent* outTimeout) nothrow
     {
         if(timeout.removeIn == 0)
         {
@@ -126,17 +126,16 @@ public:
 
     void process(ref const TimeoutComponent timeout, 
                  ref const LifeComponent life,
-                 out LifeComponent outLife)
+                 out LifeComponent outLife) nothrow
     {
         outLife = life;
         if(timeout.killEntityIn == 0) 
         {
-            writeln("KILLING ENTITY");
             outLife.alive = false; 
         }
     }
 
-    void process(ref const LifeComponent life, out LifeComponent outLife)
+    void process(ref const LifeComponent life, out LifeComponent outLife) nothrow
     {
         outLife = life;
     }
@@ -145,7 +144,7 @@ public:
 class TestNoOutputProcess
 {
 public:
-    void process(ref const LifeComponent life)
+    void process(ref const LifeComponent life) nothrow
     {
         /*writeln("TestNoOutputProcess: ", life);*/
     }
@@ -237,13 +236,11 @@ void realMain()
         }.format(frame));
 
         entityMgr.executeFrame();
-        ResourceHandle!EntityPrototypeResource[] handles = 
-            entityHandles[frame][];
-        EntityID[] ids                           = entityIDs[frame][];
+        ResourceHandle!EntityPrototypeResource[] handles = entityHandles[frame][];
+        EntityID[] ids = entityIDs[frame][];
         foreach(i, ref handle; handles)
         {
-            if(protoMgr.state(handle) == ResourceState.Loaded &&
-               ids[i].isNull)
+            if(protoMgr.state(handle) == ResourceState.Loaded && ids[i].isNull)
             {
                 /*writefln("Going to add entity %s %s", frame, handle);*/
                 immutable(EntityPrototype)* prototype = 

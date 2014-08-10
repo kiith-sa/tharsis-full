@@ -8,6 +8,8 @@ module tharsis.defaults.processes;
 
 
 import std.typecons;
+import std.exception: assumeWontThrow;
+
 
 import tharsis.defaults.components;
 public import tharsis.defaults.copyprocess;
@@ -136,7 +138,7 @@ public:
     /// Params:  prototype = Prototype of the entity to create.
     ///
     /// Returns: ID of the newly created entity.
-    alias EntityID delegate (ref immutable(EntityPrototype) prototype) @trusted 
+    alias EntityID delegate (ref immutable(EntityPrototype) prototype) @trusted nothrow
         AddEntity;
 
     /// Construct a SpawnerProcess.
@@ -170,10 +172,10 @@ public:
     }
 
     /// Called at the beginning of a game update before processing any entities.
-    void preProcess()
+    void preProcess() nothrow
     {
         // Delete prototypes from the previous game update; they are be spawned by now.
-        destroy(toSpawn_);
+        destroy(toSpawn_).assumeWontThrow;
         toSpawnData_.clear();
     }
 
@@ -181,7 +183,7 @@ public:
     /// future components.
     void process(ref const(Context) context,
                  immutable SpawnerMultiComponent[] spawners,
-                 immutable TimedSpawnConditionMultiComponent[] spawnConditions)
+                 immutable TimedSpawnConditionMultiComponent[] spawnConditions) nothrow
     {
         // Spawner components are kept even if all conditions that may spawn them are
         // removed (i.e. if no condition matches the spawnerID of a spawner component).
@@ -256,7 +258,7 @@ private:
     ///                      components that may vary between entities of same 'type').
     void spawn(ref const(Context) context,
                const ResourceHandle!EntityPrototypeResource baseHandle,
-               const ResourceHandle!InlineEntityPrototypeResource overHandle)
+               const ResourceHandle!InlineEntityPrototypeResource overHandle) nothrow
     {
         // Entity prototype serving as the base of the new entity.
         auto base = prototypeManager_.resource(baseHandle).prototype;
@@ -333,7 +335,7 @@ public:
 
     /// Reads and updates timed spawn conditions.
     void process(immutable TimedSpawnConditionMultiComponent[] pastConditions,
-                 ref TimedSpawnConditionMultiComponent[] futureConditions)
+                 ref TimedSpawnConditionMultiComponent[] futureConditions) nothrow
     {
         size_t index;
         foreach(ref past; pastConditions)

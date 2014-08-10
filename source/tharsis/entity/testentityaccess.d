@@ -44,7 +44,7 @@ public:
 
     void process(ref const PhysicsComponent physics,
                  out PhysicsComponent outPhysics,
-                 ref const(Context) context)
+                 ref const(Context) context) nothrow
     {
         outPhysics = physics;
         const entity = context.currentEntity;
@@ -80,7 +80,7 @@ public:
 
     void process(ref const PhysicsComponent physics,
                  ref const HealthComponent health,
-                 out PhysicsComponent outPhysics)
+                 out PhysicsComponent outPhysics) nothrow
     {
         outPhysics = physics;
         assert(false, "A process() method using a HealthComponent called "
