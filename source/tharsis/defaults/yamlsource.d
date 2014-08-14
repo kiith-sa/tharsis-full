@@ -202,4 +202,10 @@ public:
         alias bool delegate(string, ref YAMLSource) nothrow nothrowFunc;
         return (cast(nothrowFunc)&implementation)(key, target);
     }
+
+    /// Is this a scalar source? A scalar is any source that is not a sequence or a mapping.
+    bool isScalar() @safe nothrow const
+    {
+        return yaml_.isScalar();
+    }
 }

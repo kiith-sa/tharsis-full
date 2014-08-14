@@ -47,6 +47,11 @@ public:
     {
         assert(false);
     }
+
+    bool isScalar() @safe nothrow const
+    {
+        assert(false);
+    }
 }
 
 unittest
