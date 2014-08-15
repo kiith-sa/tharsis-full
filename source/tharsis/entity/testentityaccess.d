@@ -150,6 +150,7 @@ unittest
 
     auto descriptor1 = EntityPrototypeResource.Descriptor(testFile1);
     auto descriptor2 = EntityPrototypeResource.Descriptor(testFile2);
+
     auto handle1     = protoMgr.handle(descriptor1);
     auto handle2     = protoMgr.handle(descriptor2);
     protoMgr.requestLoad(handle1);

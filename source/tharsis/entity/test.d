@@ -169,9 +169,7 @@ void realMain()
 
     auto entityMgr      = new EntityManager!DefaultEntityPolicy(compTypeMgr);
     scope(exit) { entityMgr.destroy(); }
-
     auto protoMgr       = new PrototypeManager(compTypeMgr, entityMgr);
-    auto inlineProtoMgr = new InlinePrototypeManager(compTypeMgr, entityMgr);
 
     auto lifeProc        = new TestLifeProcess();
     auto noOutProc       = new TestNoOutputProcess();
@@ -188,11 +186,8 @@ void realMain()
     auto timedSpawnConditionProc =
         new TimedSpawnConditionProcess(delegate double(){return 1.0 / 60;});
 
-    auto spawnerProc = new SpawnerProcess!DefaultEntityPolicy 
-                               (&entityMgr.addEntity,
-                                protoMgr,
-                                inlineProtoMgr,
-                                compTypeMgr);
+    auto spawnerProc =
+        new SpawnerProcess!DefaultEntityPolicy(&entityMgr.addEntity, protoMgr, compTypeMgr);
     entityMgr.registerProcess(lifeProc);
     entityMgr.registerProcess(noOutProc);
     entityMgr.registerProcess(physicsProc);
@@ -202,7 +197,6 @@ void realMain()
     entityMgr.registerProcess(spawnerCopyProc);
     entityMgr.registerProcess(timedSpawnConditionProc);
     entityMgr.registerResourceManager(protoMgr);
-    entityMgr.registerResourceManager(inlineProtoMgr);
 
 
     int[][8] entityNumbers = [[1],

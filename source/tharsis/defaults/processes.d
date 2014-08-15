@@ -109,12 +109,9 @@ private:
     /// EntityManager (at the beginning of the next game update).
     AddEntity addEntity_;
 
-    /// Manages EntityPrototype resources.
+    /// Manages EntityPrototype resources, both prototypes to spawn and override
+    /// prototypes.
     ResourceManager!EntityPrototypeResource prototypeManager_;
-
-    /// Manages entity prototypes defined inline in entities
-    /// (in this case, SpawnerMultiComponent.override).
-    ResourceManager!InlineEntityPrototypeResource inlinePrototypeManager_;
 
     /// Entity prototypes to spawn during the next game update.
     ///
@@ -145,7 +142,6 @@ public:
     ///
     /// Params: addEntity              = Delegate to add an entity.
     ///         prototypeManager       = Manages entity prototype resources.
-    ///         inlinePrototypeManager = Manages entity prototype resources defined
     ///                                  inline in an entity.
     ///         componentTypeManager   = The component type manager where all used
     ///                                  component types are registered.
@@ -160,13 +156,11 @@ public:
     /// --------------------
     this(AddEntity addEntity,
          ResourceManager!EntityPrototypeResource prototypeManager,
-         ResourceManager!InlineEntityPrototypeResource inlinePrototypeManager,
          AbstractComponentTypeManager componentTypeManager)
         @safe pure nothrow
     {
         addEntity_              = addEntity;
         prototypeManager_       = prototypeManager;
-        inlinePrototypeManager_ = inlinePrototypeManager;
         componentTypeManager_   = componentTypeManager;
         maxPrototypeBytes_ = EntityPrototype.maxPrototypeBytes(componentTypeManager);
     }
@@ -232,18 +226,12 @@ private:
     /// Returns: True if the resources are loaded and can be used to spawn an entity.
     ///          False otherwise.
     bool spawnerReady(const ResourceHandle!EntityPrototypeResource baseHandle,
-                      const ResourceHandle!InlineEntityPrototypeResource overHandle)
+                      const ResourceHandle!EntityPrototypeResource overHandle)
     {
         const baseState  = prototypeManager_.state(baseHandle);
-        const overState  = inlinePrototypeManager_.state(overHandle);
-        if(baseState == ResourceState.New)
-        {
-            prototypeManager_.requestLoad(baseHandle);
-        }
-        if(overState == ResourceState.New)
-        {
-            inlinePrototypeManager_.requestLoad(overHandle);
-        }
+        const overState  = prototypeManager_.state(overHandle);
+        if(baseState == ResourceState.New) { prototypeManager_.requestLoad(baseHandle); }
+        if(overState == ResourceState.New) { prototypeManager_.requestLoad(overHandle); }
 
         return baseState == ResourceState.Loaded && overState == ResourceState.Loaded;
     }
@@ -258,20 +246,19 @@ private:
     ///                      components that may vary between entities of same 'type').
     void spawn(ref const(Context) context,
                const ResourceHandle!EntityPrototypeResource baseHandle,
-               const ResourceHandle!InlineEntityPrototypeResource overHandle) nothrow
+               const ResourceHandle!EntityPrototypeResource overHandle) nothrow
     {
         // Entity prototype serving as the base of the new entity.
         auto base = prototypeManager_.resource(baseHandle).prototype;
         // Entity prototype storing components applied to (overriding) base to create
         // the new entity.
-        auto over = inlinePrototypeManager_.resource(overHandle).prototype;
+        auto over = prototypeManager_.resource(overHandle).prototype;
         // Allocate memory for the new component.
         auto memory = toSpawnData_.getBytes(maxPrototypeBytes_);
 
         auto componentTypes = componentTypeManager_.componentTypeInfo;
         // Create the prototype of the entity to spawn.
-        EntityPrototype combined = 
-            mergePrototypesOverride(base, over, memory, componentTypes);
+        EntityPrototype combined = mergePrototypesOverride(base, over, memory, componentTypes);
 
         auto combinedBytes = combined.lockAndTrimMemory(componentTypes);
 
