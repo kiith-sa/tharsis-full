@@ -163,7 +163,7 @@ void realMain()
     compTypeMgr.registerComponentTypes!PhysicsComponent();
     compTypeMgr.registerComponentTypes!TestMultiComponent();
     compTypeMgr.registerComponentTypes!SpawnerMultiComponent();
-    compTypeMgr.registerComponentTypes!TimedSpawnConditionMultiComponent();
+    compTypeMgr.registerComponentTypes!TimedTriggerMultiComponent();
     compTypeMgr.lock();
 
 

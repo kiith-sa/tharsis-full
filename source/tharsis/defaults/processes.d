@@ -57,7 +57,7 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  *               y: 50.0
  *               z: 50.0
  * 
- * timedSpawnConditionMulti:
+ * timedTriggerMulti:
  *     - time:      0.03
  *       timeLeft:  0.03
  *       periodic:  true
@@ -186,7 +186,7 @@ public:
      */
     void process(ref const(Context) context,
                  immutable SpawnerMultiComponent[] spawners,
-                 immutable TimedSpawnConditionMultiComponent[] spawnConditions) nothrow
+                 immutable TimedTriggerMultiComponent[] triggers) nothrow
     {
         // Spawner components are kept even if all conditions that may spawn them are
         // removed (i.e. if no condition matches the spawnerID of a spawner component).
@@ -194,11 +194,11 @@ public:
         // its ID is added.
         outer: foreach(ref spawner; spawners)
         {
-            // Find conditions matching this spawner component, and spawn if found.
-            foreach(ref condition; spawnConditions)
+            // Find triggers matching this spawner component, and spawn if found.
+            foreach(ref trigger; triggers)
             {
-                // Spawn condition must match the spawner component.
-                if(condition.spawnerID != spawner.spawnerID) { continue; }
+                // Spawn trigger must match the spawner component.
+                if(trigger.triggerID != spawner.triggerID) { continue; }
 
                 const baseHandle = spawner.spawn;
                 const overHandle = spawner.overrideComponents;
@@ -211,7 +211,7 @@ public:
                 if(!spawnerReady(baseHandle, overHandle)) { continue outer; }
 
                 // We've not reached the time to spawn yet.
-                if(condition.timeLeft > 0.0f) { continue; }
+                if(trigger.timeLeft > 0.0f) { continue; }
 
                 spawn(context, baseHandle, overHandle);
             }
@@ -322,7 +322,7 @@ public:
     /// A function type that gets the length (seconds) of the last game update.
     alias real delegate () @safe pure nothrow GetUpdateLength;
 
-    alias TimedSpawnConditionMultiComponent FutureComponent;
+    alias TimedTriggerMultiComponent FutureComponent;
 
     /// Construct a TimedSpawnConditionProcess using specified delegate to get the time
     /// length of the last game update in seconds.
@@ -331,14 +331,14 @@ public:
         getUpdateLength_ = getUpdateLength;
     }
 
-    /// Reads and updates timed spawn conditions.
-    void process(immutable TimedSpawnConditionMultiComponent[] pastConditions,
-                 ref TimedSpawnConditionMultiComponent[] futureConditions) nothrow
+    /// Reads and updates timed triggers.
+    void process(immutable TimedTriggerMultiComponent[] pastTriggers,
+                 ref TimedTriggerMultiComponent[] futureTriggers) nothrow
     {
         size_t index;
-        foreach(ref past; pastConditions)
+        foreach(ref past; pastTriggers)
         {
-            auto future = &futureConditions[index];
+            auto future = &futureTriggers[index];
             *future = past;
             if(past.timeLeft <= 0.0)
             {
@@ -355,6 +355,6 @@ public:
             future.timeLeft -= getUpdateLength_();
             ++index;
         }
-        futureConditions = futureConditions[0 .. index];
+        futureTriggers = futureTriggers[0 .. index];
     } 
 }

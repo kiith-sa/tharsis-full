@@ -14,7 +14,7 @@ import tharsis.entity.resourcemanager;
 
 /// Contains data about an entity to spawn.
 ///
-/// Condition to trigger the spawn is represented by a TimedSpawnConditionMultiComponent
+/// Condition to trigger the spawn is represented by a TimedTriggerMultiComponent
 /// and may be represented by more spawn condition component types in future.
 ///
 /// See_Also: SpawnerProcess
@@ -41,8 +41,8 @@ struct SpawnerMultiComponent
     /// Used to modify spawnees directly in the spawner source.
     @(PropertyName("override")) ResourceHandle!EntityPrototypeResource overrideComponents;
 
-    /// Spawn conditions match this to specify which SpawnerMultiComponent they affect.
-    ushort spawnerID;
+    /// Spawns are triggered by triggers matching this ID.
+    ushort triggerID;
 }
 unittest
 {
@@ -57,7 +57,7 @@ unittest
 ///
 /// Also supports periodic spawns.
 @("defaultsComponent")
-struct TimedSpawnConditionMultiComponent
+struct TimedTriggerMultiComponent
 {
     enum ComponentTypeID = maxBuiltinComponentTypes + 2;
 
@@ -82,6 +82,6 @@ struct TimedSpawnConditionMultiComponent
     float timeLeft;
     /// If true, spawns periodically, not just once.
     bool periodic;
-    /// A condition applies to a SpawnerMultiComponent with matching spawnerID.
-    ushort spawnerID;
+    /// ID of the trigger, used to determine what is being triggered.
+    ushort triggerID;
 }
