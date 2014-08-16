@@ -23,11 +23,11 @@ struct SpawnerMultiComponent
 {
     enum ComponentTypeID = maxBuiltinComponentTypes + 1;
 
-    /// It's unlikely that one entity would spawn more than 1024 different entities.
-    enum maxComponentsPerEntity = 1024;
+    /// It's unlikely that one entity would spawn more than 4096 different entities.
+    enum maxComponentsPerEntity = 4096;
 
     /// Cheap enough and won't be exceeded in most cases.
-    enum minPrealloc = 4096;
+    enum minPrealloc = 8192;
 
     /// Assume a third of entities can spawn other entities (e.g. entities with weapons).
     enum minPreallocPerEntity = 0.3;
@@ -62,10 +62,10 @@ struct TimedTriggerMultiComponent
     enum ComponentTypeID = maxBuiltinComponentTypes + 2;
 
     /// Should be enough even for extreme cases.
-    enum maxComponentsPerEntity = 1024;
+    enum maxComponentsPerEntity = 4096;
 
     /// Cheap enough and won't be exceeded in most cases.
-    enum minPrealloc = 4096;
+    enum minPrealloc = 8192;
 
     /// Assume a third of entities can spawn (e.g. entities with weapons).
     enum minPreallocPerEntity = 0.3;
