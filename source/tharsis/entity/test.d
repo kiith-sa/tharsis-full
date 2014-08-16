@@ -184,7 +184,7 @@ void realMain()
     //    in a setter; will also have some kind of default.
     //
     auto timedSpawnConditionProc =
-        new TimedSpawnConditionProcess(delegate double(){return 1.0 / 60;});
+        new TimedTriggerProcess(delegate real(){return 1.0 / 60;});
 
     auto spawnerProc =
         new SpawnerProcess!DefaultEntityPolicy(&entityMgr.addEntity, protoMgr, compTypeMgr);

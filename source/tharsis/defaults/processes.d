@@ -307,10 +307,11 @@ private:
 }
 
 
-/// Updates timed spawn condtitions.
-///
-/// Must be registered with the EntityManager for TimedSpawnConditionComponents to work.
-class TimedSpawnConditionProcess
+/** Updates timed triggers.
+ *
+ * Must be registered with the EntityManager for TimedTriggerComponents to work.
+ */
+class TimedTriggerProcess
 {
 private:
     /// A function that gets the length (seconds) of the last game update.
@@ -318,7 +319,7 @@ private:
 
 public:
     /// A function type that gets the length (seconds) of the last game update.
-    alias double delegate () @safe pure nothrow GetUpdateLength;
+    alias real delegate () @safe pure nothrow GetUpdateLength;
 
     alias TimedSpawnConditionMultiComponent FutureComponent;
 
