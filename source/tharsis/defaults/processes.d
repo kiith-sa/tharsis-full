@@ -26,6 +26,7 @@ import tharsis.entity.resourcemanager;
 import tharsis.util.pagedarray;
 
 
+import tharsis.entity.entitypolicy;
 
 /// The default spawner process to be used with DefaultEntityManager.
 alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
