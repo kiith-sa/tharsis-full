@@ -27,96 +27,102 @@ import tharsis.util.pagedarray;
 
 
 
-/// Reads SpawnerComponents and various spawn conditions and spawns new entities.
-///
-/// Can be derived to add support for more spawn condition component types.
-///
-///
-/// The SpawnerProcess processes SpawnerMultiComponents in combination with spawn
-/// condition components (right now only TimedSpawnConditionMultiComponent).
-///
-/// To be able to spawn new entities, an entity needs both one or more 
-/// SpawnerMultiComponents and some kind of spawn condition component/s (for now
-/// only TimedSpawnConditionMultiComponent).
-///
-/// For example (with YAMLSource):
-/// -------------------
-/// spawnerMulti:
-///     - spawn:     test_data/entity1.yaml
-///       spawnerID: 1
-///       override:
-///     - spawn:     test_data/entity2.yaml
-///       spawnerID: 2
-///       override:
-///           physics:
-///               x: 50.0
-///               y: 50.0
-///               z: 50.0
-/// 
-/// timedSpawnConditionMulti:
-///     - time:      0.03
-///       timeLeft:  0.03
-///       periodic:  true
-///       spawnerID: 1
-///     - time:      1.03
-///       timeLeft:  0.03
-///       periodic:  false
-///       spawnerID: 2
-/// -------------------
-///
-/// In this example our entity has 2 spawner components, the first of which spawns
-/// "test_data/entity1.yaml" without changing any of its components and the second
-/// spawns "test_data/entity2.yaml", but overrides (example) "physics"
-/// (PhysicsComponent). (If there is no "physics" component in the spawned entity, it
-/// is added by the override.) It also has 2 spawn condition components. The first
-/// triggers the spawner component with spawnerID 1 every 30 milliseconds while the 
-/// second triggers the spawner component with spawnerID 2 exactly once.
-///
-/// Relative properties:
-///
-/// While we don't (yet) have any comphrehensive way to modify spawned entities other
-/// than overriding, most games need at least some way to set properties of a spawnee 
-/// relative to the spawner (for example, spawning an entity in a position relative to
-/// the spawner).
-///
-/// SpawnerSystem can recognize some properties as "relative", meaning the value of the
-/// property in a spawnee is added to the value of the same property in the spawner 
-/// entity. To mark a property of a component as relative, add a string user-defined
-/// attribute with value "relative" to the property. 
-///
-/// Example:
-/// --------------------
-/// struct PhysicsComponent
-/// {
-///     enum ushort ComponentTypeID = userComponentTypeID!2;
-/// 
-///     enum minPrealloc = 16384;
-/// 
-///     enum minPreallocPerEntity = 1.0;
-/// 
-///     // not relative
-///     float mass;
-///     // these 3 are relative
-///     @("relative") float x;
-///     @("relative") float y;
-///     @("relative") float z;
-/// }
-/// --------------------
+/// The default spawner process to be used with DefaultEntityManager.
+alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
+
+/** Reads SpawnerComponents and various spawn conditions and spawns new entities.
+ *
+ * Can be derived to add support for more spawn condition component types.
+ *
+ *
+ * The SpawnerProcess processes SpawnerMultiComponents in combination with spawn
+ * condition components (right now only TimedTriggerMultiComponent).
+ *
+ * To be able to spawn new entities, an entity needs both one or more 
+ * SpawnerMultiComponents and some kind of spawn condition component/s (for now
+ * only TimedTriggerMultiComponent).
+ *
+ * For example (with YAMLSource):
+ * -------------------
+ * spawnerMulti:
+ *     - spawn:     test_data/entity1.yaml
+ *       triggerID: 1
+ *       override:
+ *     - spawn:     test_data/entity2.yaml
+ *       triggerID: 2
+ *       override:
+ *           physics:
+ *               x: 50.0
+ *               y: 50.0
+ *               z: 50.0
+ * 
+ * timedSpawnConditionMulti:
+ *     - time:      0.03
+ *       timeLeft:  0.03
+ *       periodic:  true
+ *       triggerID: 1
+ *     - time:      1.03
+ *       timeLeft:  0.03
+ *       periodic:  false
+ *       triggerID: 2
+ * -------------------
+ *
+ * In this example our entity has 2 spawner components, the first of which spawns
+ * "test_data/entity1.yaml" without changing any of its components and the second
+ * spawns "test_data/entity2.yaml", but overrides (example) "physics"
+ * (PhysicsComponent). (If there is no "physics" component in the spawned entity, it
+ * is added by the override.) It also has 2 spawn condition components. The first
+ * triggers the spawner component with triggerID 1 every 30 milliseconds while the 
+ * second triggers the spawner component with triggerID 2 exactly once.
+ *
+ * Relative properties:
+ *
+ * While we don't (yet) have any comphrehensive way to modify spawned entities other
+ * than overriding, most games need at least some way to set properties of a spawnee 
+ * relative to the spawner (for example, spawning an entity in a position relative to
+ * the spawner).
+ *
+ * SpawnerProcess can recognize some properties as "relative", meaning the value of the
+ * property in a spawnee is added to the value of the same property in the spawner 
+ * entity. To mark a property of a component as relative, add a string user-defined
+ * attribute with value "relative" to the property. 
+ *
+ * Example:
+ * --------------------
+ * struct PhysicsComponent
+ * {
+ *     enum ushort ComponentTypeID = userComponentTypeID!2;
+ * 
+ *     enum minPrealloc = 16384;
+ * 
+ *     enum minPreallocPerEntity = 1.0;
+ * 
+ *     // not relative
+ *     float mass;
+ *     // these 3 are relative
+ *     @("relative") float x;
+ *     @("relative") float y;
+ *     @("relative") float z;
+ * }
+ * --------------------
+ */
 class SpawnerProcess(Policy)
 {
 private:
-    /// A function that takes an entity prototype and adds a new entity to the 
-    /// EntityManager (at the beginning of the next game update).
+    /** A function that takes an entity prototype and adds a new entity to the 
+     *  EntityManager (at the beginning of the next game update).
+     */
     AddEntity addEntity_;
 
-    /// Manages EntityPrototype resources, both prototypes to spawn and override
-    /// prototypes.
+    /// Manages EntityPrototype resources, both prototypes to spawn and override prototypes.
     ResourceManager!EntityPrototypeResource prototypeManager_;
 
-    /// Entity prototypes to spawn during the next game update.
-    ///
-    /// Cleared at the beginning of the next game update (after entity manager adds the
-    /// new entities).
+    /**
+     * Entity prototypes to spawn during the next game update.
+     *
+     * Cleared at the beginning of the next game update (after entity manager adds the
+     * new entities).
+     */
     PagedArray!EntityPrototype toSpawn_;
 
     /// Memory used by prototypes in toSpawn_ to store components.
@@ -125,35 +131,36 @@ private:
     /// Component type manager, to access component type info.
     AbstractComponentTypeManager componentTypeManager_;
 
-    /// Number of bytes to reserve when creating a prototype to ensure any prototype can
-    /// fit.
+    /// Number of bytes to reserve when creating a prototype to ensure any prototype can fit.
     size_t maxPrototypeBytes_;
 
 public:
-    /// A type of delegates that create a new entity.
-    ///
-    /// Params:  prototype = Prototype of the entity to create.
-    ///
-    /// Returns: ID of the newly created entity.
+    /** A type of delegates that create a new entity.
+     *
+     * Params:  prototype = Prototype of the entity to create.
+     *
+     * Returns: ID of the newly created entity.
+     */
     alias EntityID delegate (ref immutable(EntityPrototype) prototype) @trusted nothrow
         AddEntity;
 
-    /// Construct a SpawnerProcess.
-    ///
-    /// Params: addEntity              = Delegate to add an entity.
-    ///         prototypeManager       = Manages entity prototype resources.
-    ///                                  inline in an entity.
-    ///         componentTypeManager   = The component type manager where all used
-    ///                                  component types are registered.
-    ///
-    /// Examples:
-    /// --------------------
-    /// // EntityManager entityManager
-    /// // ResourceManager!EntityPrototypeResource prototypeManager
-    /// // ComponentTypeManager componentTypeManager
-    /// auto spawner = new SpawnerProcess(&entityManager.addEntity, prototypeManager,
-    ///                                   componentTypeManager);
-    /// --------------------
+    /** Construct a SpawnerProcess.
+     *
+     * Params: addEntity              = Delegate to add an entity.
+     *         prototypeManager       = Manages entity prototype resources.
+     *                                  inline in an entity.
+     *         componentTypeManager   = The component type manager where all used
+     *                                  component types are registered.
+     *
+     * Examples:
+     * --------------------
+     * // EntityManager entityManager
+     * // ResourceManager!EntityPrototypeResource prototypeManager
+     * // ComponentTypeManager componentTypeManager
+     * auto spawner = new SpawnerProcess(&entityManager.addEntity, prototypeManager,
+     *                                   componentTypeManager);
+     * --------------------
+     */
     this(AddEntity addEntity,
          ResourceManager!EntityPrototypeResource prototypeManager,
          AbstractComponentTypeManager componentTypeManager)
@@ -173,8 +180,9 @@ public:
         toSpawnData_.clear();
     }
 
-    /// Reads spawners and spawn conditions. Spawns new entities, and doesn't write any
-    /// future components.
+    /** Reads spawners and spawn conditions. Spawns new entities; doesn't write any
+     * future components.
+     */
     void process(ref const(Context) context,
                  immutable SpawnerMultiComponent[] spawners,
                  immutable TimedSpawnConditionMultiComponent[] spawnConditions) nothrow
@@ -213,18 +221,19 @@ private:
     /// Context for the process() method.
     alias Context = EntityManager!Policy.Context;
 
-    /// Are spawner resources ready (loaded) for spawning?
-    ///
-    /// Starts (async) loading of the resources if not yet loaded.
-    ///
-    /// Params: baseHandle = Handle to the base prototype of the entity to spawn
-    ///                      (e.g. a unit type).
-    ///         overHandle = Handle to a prototype storing components added to or
-    ///                      overriding those in base (e.g. unit position or other
-    ///                      components that may vary between entities of same 'type').
-    ///
-    /// Returns: True if the resources are loaded and can be used to spawn an entity.
-    ///          False otherwise.
+    /** Are spawner resources ready (loaded) for spawning?
+     *
+     * Starts (async) loading of the resources if not yet loaded.
+     *
+     * Params: baseHandle = Handle to the base prototype of the entity to spawn
+     *                      (e.g. a unit type).
+     *         overHandle = Handle to a prototype storing components added to or
+     *                      overriding those in base (e.g. unit position or other
+     *                      components that may vary between entities of same 'type').
+     *
+     * Returns: True if the resources are loaded and can be used to spawn an entity.
+     *          False otherwise.
+     */
     bool spawnerReady(const ResourceHandle!EntityPrototypeResource baseHandle,
                       const ResourceHandle!EntityPrototypeResource overHandle)
     {
@@ -236,14 +245,14 @@ private:
         return baseState == ResourceState.Loaded && overState == ResourceState.Loaded;
     }
 
-    /// Spawn a new entity created by applying an overriding prototype to a base
-    /// prototype.
-    ///
-    /// Params: baseHandle = Handle to the base prototype of the entity to spawn
-    ///                      (e.g. a unit type).
-    ///         overHandle = Handle to a prototype storing components added to or
-    ///                      overriding those in base (e.g. unit position or other
-    ///                      components that may vary between entities of same 'type').
+    /** Spawn a new entity created by applying an overriding prototype to a base prototype.
+     *
+     * Params: baseHandle = Handle to the base prototype of the entity to spawn
+     *                      (e.g. a unit type).
+     *         overHandle = Handle to a prototype storing components added to or
+     *                      overriding those in base (e.g. unit position or other
+     *                      components that may vary between entities of same 'type').
+     */
     void spawn(ref const(Context) context,
                const ResourceHandle!EntityPrototypeResource baseHandle,
                const ResourceHandle!EntityPrototypeResource overHandle) nothrow
