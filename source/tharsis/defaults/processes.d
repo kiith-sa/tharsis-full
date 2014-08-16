@@ -31,17 +31,17 @@ import tharsis.entity.entitypolicy;
 /// The default spawner process to be used with DefaultEntityManager.
 alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
 
-/** Reads SpawnerComponents and various spawn conditions and spawns new entities.
+/** Reads SpawnerComponents and various triggers and spawns new entities.
  *
- * Can be derived to add support for more spawn condition component types.
+ * Can be derived to add support for more trigger component types.
  *
  *
- * The SpawnerProcess processes SpawnerMultiComponents in combination with spawn
- * condition components (right now only TimedTriggerMultiComponent).
+ * The SpawnerProcess processes SpawnerMultiComponents in combination with trigger
+ * components (right now only TimedTriggerMultiComponent).
  *
  * To be able to spawn new entities, an entity needs both one or more 
- * SpawnerMultiComponents and some kind of spawn condition component/s (for now
- * only TimedTriggerMultiComponent).
+ * SpawnerMultiComponents and some kind of trigger component/s (for now only
+ * TimedTriggerMultiComponent).
  *
  * For example (with YAMLSource):
  * -------------------
@@ -69,12 +69,12 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  * -------------------
  *
  * In this example our entity has 2 spawner components, the first of which spawns
- * "test_data/entity1.yaml" without changing any of its components and the second
- * spawns "test_data/entity2.yaml", but overrides (example) "physics"
- * (PhysicsComponent). (If there is no "physics" component in the spawned entity, it
- * is added by the override.) It also has 2 spawn condition components. The first
- * triggers the spawner component with triggerID 1 every 30 milliseconds while the 
- * second triggers the spawner component with triggerID 2 exactly once.
+ * "test_data/entity1.yaml" without changing any of its components and the second spawns
+ * "test_data/entity2.yaml", but overrides (example) "physics" (PhysicsComponent). 
+ * (If there is no "physics" component in the spawned entity, it is added by the
+ * override.) It also has 2 trigger components. The first triggers the spawner component
+ * with triggerID 1 every 30 milliseconds while the second triggers the spawner
+ * component with triggerID 2 exactly once.
  *
  * Relative properties:
  *
@@ -167,10 +167,10 @@ public:
          AbstractComponentTypeManager componentTypeManager)
         @safe pure nothrow
     {
-        addEntity_              = addEntity;
-        prototypeManager_       = prototypeManager;
-        componentTypeManager_   = componentTypeManager;
-        maxPrototypeBytes_ = EntityPrototype.maxPrototypeBytes(componentTypeManager);
+        addEntity_            = addEntity;
+        prototypeManager_     = prototypeManager;
+        componentTypeManager_ = componentTypeManager;
+        maxPrototypeBytes_    = EntityPrototype.maxPrototypeBytes(componentTypeManager);
     }
 
     /// Called at the beginning of a game update before processing any entities.
@@ -181,16 +181,14 @@ public:
         toSpawnData_.clear();
     }
 
-    /** Reads spawners and spawn conditions. Spawns new entities; doesn't write any
-     * future components.
-     */
+    /// Reads spawners and triggers. Spawns new entities; doesn't write any future components.
     void process(ref const(Context) context,
                  immutable SpawnerMultiComponent[] spawners,
                  immutable TimedTriggerMultiComponent[] triggers) nothrow
     {
-        // Spawner components are kept even if all conditions that may spawn them are
-        // removed (i.e. if no condition matches the spawnerID of a spawner component).
-        // This allows the spawner component to be triggered if a new condition matching
+        // Spawner components are kept even if all triggers that may spawn them are
+        // removed (i.e. if no trigger matches the triggerID of a spawner component).
+        // This allows the spawner component to be triggered if a new trigger matching
         // its ID is added.
         outer: foreach(ref spawner; spawners)
         {
@@ -284,8 +282,7 @@ private:
             auto typeInfo = &componentTypes[comp.typeID];
             // Relative does not work for MultiComponents.
             if(typeInfo.isMulti) { continue; }
-            auto spawnerComp =
-                context.rawPastComponent(comp.typeID, context.currentEntity.id);
+            auto spawnerComp = context.rawPastComponent(comp.typeID, context.currentEntity.id);
             // If the spawner doesn't have this component, we don't have anything to be
             // relative to so we just keep the unchanged value.
             if(spawnerComp.isNull) { continue; }
@@ -324,8 +321,9 @@ public:
 
     alias TimedTriggerMultiComponent FutureComponent;
 
-    /// Construct a TimedSpawnConditionProcess using specified delegate to get the time
-    /// length of the last game update in seconds.
+    /** Construct a TimedTriggerProcess using specified delegate to get the time
+     * length of the last game update in seconds.
+     */
     this(GetUpdateLength getUpdateLength) @safe pure nothrow
     {
         getUpdateLength_ = getUpdateLength;
@@ -342,10 +340,9 @@ public:
             *future = past;
             if(past.timeLeft <= 0.0)
             {
-                // timeLeft < 0 triggers a spawn in SpawnerProcess (if there is a 
-                // SpawnerComponent to which this condition applies). After a spawn, if
-                // the condition is not periodic, we forget the spawn condition
-                // component.
+                // timeLeft <= 0 also triggers a spawn in SpawnerProcess (if there is a
+                // SpawnerComponent to which this trigger applies). After a spawn, if
+                // the trigger is not periodic, we forget the trigger component.
                 if(!past.periodic) { continue; }
 
                 // Start the next period.

@@ -14,8 +14,8 @@ import tharsis.entity.resourcemanager;
 
 /// Contains data about an entity to spawn.
 ///
-/// Condition to trigger the spawn is represented by a TimedTriggerMultiComponent
-/// and may be represented by more spawn condition component types in future.
+/// Condition to trigger the spawn is represented by a TimedTriggerMultiComponent and
+/// may be represented by more trigger component types in future.
 ///
 /// See_Also: SpawnerProcess
 @("defaultsComponent")
@@ -75,9 +75,9 @@ struct TimedTriggerMultiComponent
     ///
     /// If periodic, this is the period.
     float time;
-    /// The time left until the condition is triggered.
+    /// The time left until the trigger is triggered.
     ///
-    /// Can be set from the start to a different value to force the condition to be
+    /// Can be set from the start to a different value to force the trigger to be
     /// triggered earlier.
     float timeLeft;
     /// If true, spawns periodically, not just once.
