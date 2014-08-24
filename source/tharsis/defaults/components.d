@@ -23,11 +23,11 @@ struct SpawnerMultiComponent
 {
     enum ComponentTypeID = maxBuiltinComponentTypes + 1;
 
-    /// It's unlikely that one entity would spawn more than 4096 different entities.
-    enum maxComponentsPerEntity = 4096;
+    /// It's unlikely that one entity would spawn more than 8192 different entities.
+    enum maxComponentsPerEntity = 8192;
 
     /// Cheap enough and won't be exceeded in most cases.
-    enum minPrealloc = 8192;
+    enum minPrealloc = 16384;
 
     /// Assume a third of entities can spawn other entities (e.g. entities with weapons).
     enum minPreallocPerEntity = 0.3;
