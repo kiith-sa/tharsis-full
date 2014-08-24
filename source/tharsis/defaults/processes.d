@@ -234,7 +234,7 @@ protected:
      *          False otherwise.
      */
     bool spawnerReady(const ResourceHandle!EntityPrototypeResource baseHandle,
-                      const ResourceHandle!EntityPrototypeResource overHandle)
+                      const ResourceHandle!EntityPrototypeResource overHandle) nothrow
     {
         const baseState  = prototypeManager_.state(baseHandle);
         const overState  = prototypeManager_.state(overHandle);
