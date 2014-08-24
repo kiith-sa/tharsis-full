@@ -52,6 +52,16 @@ public:
     {
         assert(false);
     }
+
+    bool isSequence() @safe nothrow const
+    {
+        assert(false);
+    }
+
+    bool isMapping() @safe nothrow const
+    {
+        assert(false);
+    }
 }
 
 unittest
