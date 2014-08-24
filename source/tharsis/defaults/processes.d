@@ -216,7 +216,7 @@ public:
         }
     }
 
-private:
+protected:
     /// Context for the process() method.
     alias Context = EntityManager!Policy.Context;
 
