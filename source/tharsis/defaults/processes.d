@@ -319,7 +319,7 @@ public:
     /// A function type that gets the length (seconds) of the last game update.
     alias real delegate () @safe pure nothrow GetUpdateLength;
 
-    alias TimedTriggerMultiComponent FutureComponent;
+    alias FutureComponent = TimedTriggerMultiComponent;
 
     /** Construct a TimedTriggerProcess using specified delegate to get the time
      * length of the last game update in seconds.
