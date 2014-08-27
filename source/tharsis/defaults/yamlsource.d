@@ -132,6 +132,9 @@ public:
      */
     bool getSequenceValue(size_t index, out YAMLSource target) @trusted nothrow
     {
+        // Null works as a scalar, sequence and mapping at the same time; this way we
+        // can have e.g. empty sequences without explicit "[]".
+        if(yaml_.isNull) { return false; }
         if(!yaml_.isSequence)
         {
             assert(false, "Called getSequenceValue() on a non-sequence YAMLSource");
@@ -171,6 +174,9 @@ public:
     bool getMappingValue(string key, out YAMLSource target)
         @trusted nothrow
     {
+        // Null works as a scalar, sequence and mapping at the same time; this way we
+        // can have e.g. empty mappings without explicit "{}".
+        if(yaml_.isNull) { return false; }
         if(!yaml_.isMapping)
         {
             assert(false, "Called getMappingValue() on a non-mapping YAMLSource");
@@ -201,8 +207,8 @@ public:
     bool isScalar() @safe nothrow const { return yaml_.isScalar(); }
 
     /// Is this a sequence source? A sequence acts as an array of values of various types.
-    bool isSequence() @safe nothrow const { return yaml_.isSequence(); }
+    bool isSequence() @safe nothrow const { return yaml_.isSequence() || yaml_.isNull; }
 
     /// Is this a mapping source? A mapping acts as an associative array of various types.
-    bool isMapping() @safe nothrow const { return yaml_.isMapping(); }
+    bool isMapping() @safe nothrow const { return yaml_.isMapping() || yaml_.isNull; }
 }
