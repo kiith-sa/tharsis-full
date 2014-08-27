@@ -42,7 +42,7 @@ struct SpawnerMultiComponent
     @(PropertyName("override")) ResourceHandle!EntityPrototypeResource overrideComponents;
 
     /// Spawns are triggered by triggers matching this ID.
-    ushort triggerID;
+    ushort triggerID = 0;
 }
 unittest
 {
@@ -74,14 +74,14 @@ struct TimedTriggerMultiComponent
     /// Time since the creation of the entity when to spawn.
     ///
     /// If periodic, this is the period.
-    float time;
+    float time = 1.0f;
     /// The time left until the trigger is triggered.
     ///
     /// Can be set from the start to a different value to force the trigger to be
     /// triggered earlier.
-    float timeLeft;
+    float timeLeft = 1.0f;
     /// If true, spawns periodically, not just once.
-    bool periodic;
+    bool periodic = false;
     /// ID of the trigger, used to determine what is being triggered.
     ushort triggerID;
 }
