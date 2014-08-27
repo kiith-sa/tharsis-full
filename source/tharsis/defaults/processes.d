@@ -284,6 +284,9 @@ protected:
             }
         }
 
+        auto hookRange = combined.componentRange(componentTypes);
+        spawnHook(hookRange);
+
         toSpawnData_.lockBytes(combinedBytes);
 
         // Add the prototype to toSpawn_ to ensure it exists until the
@@ -293,6 +296,24 @@ protected:
         toSpawn_.appendImmutable(combined);
         // Spawn the entity (at the beginning of the next game update).
         addEntity_(toSpawn_.atImmutable(toSpawn_.length - 1));
+    }
+
+    /** Called right before spawning an entity.
+     *
+     * Can be used by derived SpawnerProcess implementations to modify components
+     * of an entity just before spawning.
+     *
+     * Currently, it is only possible to modify components already present, not add or
+     * remove components.
+     *
+     * Params:
+     *
+     * components = A range of (modifiable) components in an entity that's about to spawn.
+     */
+    void spawnHook(ref EntityPrototype.GenericComponentRange!(No.isConst) components)
+        @system nothrow
+    {
+        return;
     }
 }
 
