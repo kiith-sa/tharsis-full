@@ -147,11 +147,10 @@ public:
 
     /** Construct a SpawnerProcess.
      *
-     * Params: addEntity              = Delegate to add an entity.
-     *         prototypeManager       = Manages entity prototype resources.
-     *                                  inline in an entity.
-     *         componentTypeManager   = The component type manager where all used
-     *                                  component types are registered.
+     * Params: addEntity            = Delegate to add an entity.
+     *         prototypeManager     = Manages entity prototype resources.
+     *         componentTypeManager = The component type manager where all used
+     *                                component types are registered.
      *
      * Examples:
      * --------------------
@@ -190,29 +189,21 @@ public:
         // removed (i.e. if no trigger matches the triggerID of a spawner component).
         // This allows the spawner component to be triggered if a new trigger matching
         // its ID is added.
-        outer: foreach(ref spawner; spawners)
+
+        // Find triggers matching this spawner component, and spawn if found.
+        outer: foreach(ref spawner; spawners) foreach(ref trigger; triggers)
         {
-            // Find triggers matching this spawner component, and spawn if found.
-            foreach(ref trigger; triggers)
-            {
-                // Spawn trigger must match the spawner component.
-                if(trigger.triggerID != spawner.triggerID) { continue; }
+            // Spawn trigger must match the spawner component.
+            if(trigger.triggerID != spawner.triggerID) { continue; }
 
-                const baseHandle = spawner.spawn;
-                const overHandle = spawner.overrideComponents;
+            // If the spawner is not fully loaded (any of its resources not in the
+            // Loaded state), ignore it completely and move on to the next one. This
+            // means we miss spawns when a spawner is not loaded. We may add 'delayed'
+            // spawns to compensate for this in future.
+            if(!spawnerReady(spawner)) { continue outer; }
 
-                // If the spawner is not fully loaded yet (any of its resources not in
-                // the Loaded state), ignore it completely and move on to the next one.
-                //
-                // This means we miss spawns when a spawner is not loaded. We may add
-                // 'delayed' spawns to compensate for this in future.
-                if(!spawnerReady(baseHandle, overHandle)) { continue outer; }
-
-                // We've not reached the time to spawn yet.
-                if(trigger.timeLeft > 0.0f) { continue; }
-
-                spawn(context, baseHandle, overHandle);
-            }
+            // Is it time to spawn?
+            if(trigger.timeLeft <= 0.0f) { spawn(context, spawner); }
         }
     }
 
@@ -220,22 +211,22 @@ protected:
     /// Context for the process() method.
     alias Context = EntityManager!Policy.Context;
 
-    /** Are spawner resources ready (loaded) for spawning?
+    /** Are spawner resources used by a spawner component ready (loaded) for spawning?
      *
      * Starts (async) loading of the resources if not yet loaded.
      *
-     * Params: baseHandle = Handle to the base prototype of the entity to spawn
-     *                      (e.g. a unit type).
-     *         overHandle = Handle to a prototype storing components added to or
-     *                      overriding those in base (e.g. unit position or other
-     *                      components that may vary between entities of same 'type').
+     * Params: spawner = The spawner component to check.
      *
      * Returns: True if the resources are loaded and can be used to spawn an entity.
      *          False otherwise.
      */
-    bool spawnerReady(const ResourceHandle!EntityPrototypeResource baseHandle,
-                      const ResourceHandle!EntityPrototypeResource overHandle) nothrow
+    final bool spawnerReady(ref const SpawnerMultiComponent spawner) nothrow
     {
+        // Handle to the base prototype of the entity to spawn (e.g. a unit type).
+        const baseHandle = spawner.spawn;
+        // Handle to a prototype storing components added to or overriding those in base
+        // (e.g. position or other components that may vary between entities of same 'type').
+        const overHandle = spawner.overrideComponents;
         const baseState  = prototypeManager_.state(baseHandle);
         const overState  = prototypeManager_.state(overHandle);
         if(baseState == ResourceState.New) { prototypeManager_.requestLoad(baseHandle); }
@@ -246,16 +237,17 @@ protected:
 
     /** Spawn a new entity created by applying an overriding prototype to a base prototype.
      *
-     * Params: baseHandle = Handle to the base prototype of the entity to spawn
-     *                      (e.g. a unit type).
-     *         overHandle = Handle to a prototype storing components added to or
-     *                      overriding those in base (e.g. unit position or other
-     *                      components that may vary between entities of same 'type').
+     * Params: spawner = Spawner component to spawn from.
      */
-    void spawn(ref const(Context) context,
-               const ResourceHandle!EntityPrototypeResource baseHandle,
-               const ResourceHandle!EntityPrototypeResource overHandle) nothrow
+    void spawn(ref const(Context) context, ref const SpawnerMultiComponent spawner)
+        nothrow
     {
+        // Handle to the base prototype of the entity to spawn (e.g. a unit type).
+        const baseHandle = spawner.spawn;
+        // Handle to a prototype storing components added to or overriding those in base
+        // (e.g. position or other components that may vary between entities of same 'type').
+        const overHandle = spawner.overrideComponents;
+
         // Entity prototype serving as the base of the new entity.
         auto base = prototypeManager_.resource(baseHandle).prototype;
         // Entity prototype storing components applied to (overriding) base to create
@@ -271,9 +263,9 @@ protected:
         auto combinedBytes = combined.lockAndTrimMemory(componentTypes);
 
         // Iterate over all components of the prototype of the new entity, and the
-        // components of same types in the spawner entity (current entity),
-        // looking for properties that should be initialized relative to a value of the
-        // same property (if any) in the spawner.
+        // components of same types in the spawner entity (current entity), looking for
+        // properties that should be initialized relative to a value of the same property
+        // (if any) in the spawner.
         //
         // Properties that are relative are updated as follows:
         // "spawnee.property += spawner.property" (the addRightToLeft() call).
