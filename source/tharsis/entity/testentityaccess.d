@@ -34,12 +34,12 @@ class TestEntityAccessProcess
 public:
     alias PhysicsComponent FutureComponent;
 
-    // The ID we expect the next processed entity to have.
-    uint nextID = 0;
+    // The ID we expect the next processed entity to have. Entity IDs start at 1.
+    uint nextID = 1;
 
     void preProcess() @safe pure nothrow
     {
-        nextID = 0;
+        nextID = 1;
     }
 
     void process(ref const PhysicsComponent physics,
@@ -48,12 +48,13 @@ public:
     {
         outPhysics = physics;
         const entity = context.currentEntity;
+
         // We should have 2 entities, 0 and 1, and process them in that order
-        assert(nextID < 2 && entity.id == EntityID(nextID),
+        assert(nextID < 3 && entity.id == EntityID(nextID),
                "Current entity has unexpected ID");
         ++nextID;
 
-        foreach(idx; 0 .. 2)
+        foreach(idx; 1 .. 3)
         {
             const id = EntityID(idx);
             auto healthPtr  = context.pastComponent!HealthComponent(id);
@@ -62,19 +63,17 @@ public:
 
             auto physicsPtr = context.pastComponent!PhysicsComponent(id);
             assert(physicsPtr !is null, "Expected component not in entity");
-            if(idx == 0)
+            if(idx == 1)
             {
                 assert(*physicsPtr == PhysicsComponent(1, 2, 3),
                        "Unexpected values in physics component of entity 0");
             }
-            else if(idx == 1)
+            else if(idx == 2)
             {
                 assert(*physicsPtr == PhysicsComponent(4, 2, 3),
                        "Unexpected values in physics component of entity 1");
             }
             else { assert(false); }
-
-
         }
     }
 
@@ -151,8 +150,8 @@ unittest
     auto descriptor1 = EntityPrototypeResource.Descriptor(testFile1);
     auto descriptor2 = EntityPrototypeResource.Descriptor(testFile2);
 
-    auto handle1     = protoMgr.handle(descriptor1);
-    auto handle2     = protoMgr.handle(descriptor2);
+    auto handle1 = protoMgr.handle(descriptor1);
+    auto handle2 = protoMgr.handle(descriptor2);
     protoMgr.requestLoad(handle1);
     protoMgr.requestLoad(handle2);
     bool loaded1 = false;
