@@ -237,8 +237,7 @@ void realMain()
             if(protoMgr.state(handle) == ResourceState.Loaded && ids[i].isNull)
             {
                 /*writefln("Going to add entity %s %s", frame, handle);*/
-                immutable(EntityPrototype)* prototype = 
-                    &(protoMgr.resource(handle).prototype);
+                immutable(EntityPrototype)* prototype = &(protoMgr.resource(handle).prototype);
                 ids[i] = entityMgr.addEntity(*prototype);
             }
         }
