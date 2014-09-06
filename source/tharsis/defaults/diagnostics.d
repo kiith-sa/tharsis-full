@@ -57,6 +57,7 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
             auto yamlProcess = YAMLNode(["name"], [process.name]);
             yamlProcess["processCalls"]       = process.processCalls;
             yamlProcess["componentTypesRead"] = process.componentTypesRead;
+            yamlProcess["duration-hnsecs"]    = process.duration;
             yamlProcess.collectionStyleHack = CollectionStyle.Block;
             yamlProcesses ~= yamlProcess;
         }
