@@ -22,20 +22,8 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
 {
     try with(diagnostics)
     {
-        auto yaml = YAMLNode(["pastEntityCount"], [pastEntityCount]);
-        yaml["processCount"]                 = processCount;
-        yaml["pastComponentsTotal"]          = pastComponentsTotal;
-        yaml["pastComponentsPerEntityTotal"] = pastComponentsPerEntityTotal;
-        yaml["processCallsTotal"]            = processCallsTotal;
-        yaml["processCallsPerEntity"]        = processCallsPerEntity;
-        yaml["pastMemoryAllocatedTotal"]     = pastMemoryAllocatedTotal;
-        yaml["pastMemoryUsedTotal"]          = pastMemoryUsedTotal;
-        yaml["pastMemoryAllocatedTotalMiB"]  = MBytes(pastMemoryAllocatedTotal).size;
-        yaml["pastMemoryUsedTotalMiB"]       = MBytes(pastMemoryUsedTotal).size;
-        yaml["pastMemoryUsedPerEntity"]      = pastMemoryUsedPerEntity;
-        yaml["componentTypesReadPerProcess"] = componentTypesReadPerProcess;
-
         import dyaml.hacks;
+
         YAMLNode[] yamlTypes;
         foreach(ushort typeID, ref type; componentTypes) if(!type.isNull)
         {
@@ -49,7 +37,8 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
             yamlType.collectionStyleHack = CollectionStyle.Block;
             yamlTypes ~= yamlType;
         }
-        yaml["componentTypes"] = YAMLNode(yamlTypes);
+
+        auto yaml = YAMLNode(["componentTypes"], [YAMLNode(yamlTypes)]);
 
         YAMLNode[] yamlProcesses;
         foreach(ref process; processes) if(!process.isNull)
@@ -62,6 +51,20 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
             yamlProcesses ~= yamlProcess;
         }
         yaml["processes"] = YAMLNode(yamlProcesses);
+
+        yaml["pastEntityCount"]              = pastEntityCount;
+        yaml["processCount"]                 = processCount;
+        yaml["pastComponentsTotal"]          = pastComponentsTotal;
+        yaml["pastComponentsPerEntityTotal"] = pastComponentsPerEntityTotal;
+        yaml["processCallsTotal"]            = processCallsTotal;
+        yaml["processCallsPerEntity"]        = processCallsPerEntity;
+        yaml["pastMemoryAllocatedTotal"]     = pastMemoryAllocatedTotal;
+        yaml["pastMemoryUsedTotal"]          = pastMemoryUsedTotal;
+        yaml["pastMemoryAllocatedTotalMiB"]  = MBytes(pastMemoryAllocatedTotal).size;
+        yaml["pastMemoryUsedTotalMiB"]       = MBytes(pastMemoryUsedTotal).size;
+        yaml["pastMemoryUsedPerEntity"]      = pastMemoryUsedPerEntity;
+        yaml["componentTypesReadPerProcess"] = componentTypesReadPerProcess;
+
         return yaml;
     }
     catch(Exception e)
