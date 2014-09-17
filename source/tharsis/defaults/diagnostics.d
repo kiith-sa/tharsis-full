@@ -52,8 +52,16 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
         }
         yaml["processes"] = YAMLNode(yamlProcesses);
 
+        YAMLNode[] yamlThreads;
+        foreach(ref thread; threads[0 .. threadCount])
+        {
+            yamlThreads ~= YAMLNode(["processesDuration"], [thread.processesDuration]);
+        }
+        yaml["threads"] = YAMLNode(yamlThreads);
+
         yaml["pastEntityCount"]              = pastEntityCount;
         yaml["processCount"]                 = processCount;
+        yaml["threadCount"]                  = threadCount;
         yaml["pastComponentsTotal"]          = pastComponentsTotal;
         yaml["pastComponentsPerEntityTotal"] = pastComponentsPerEntityTotal;
         yaml["processCallsTotal"]            = processCallsTotal;
