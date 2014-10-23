@@ -96,6 +96,8 @@ unittest
     compTypeMgr.registerComponentTypes!PhysicsComponent();
     compTypeMgr.lock();
     auto entityManager = new EntityManager!DefaultEntityPolicy(compTypeMgr);
+    scope(exit) { entityManager.destroy(); }
+    entityManager.startThreads();
     auto process = new CopyProcess!TimeoutComponent();
     entityManager.registerProcess(process);
 }

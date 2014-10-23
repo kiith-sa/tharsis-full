@@ -134,6 +134,7 @@ unittest
     compTypeMgr.lock();
     auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr);
     scope(exit) { entityMgr.destroy(); }
+    entityMgr.startThreads();
 
     auto protoMgr = new PrototypeManager(compTypeMgr, entityMgr);
     scope(exit) { protoMgr.clear(); }

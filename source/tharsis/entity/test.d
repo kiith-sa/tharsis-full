@@ -8,6 +8,7 @@
 module tharsis.entity.test;
 
 import std.array;
+import std.exception: assumeWontThrow;
 import std.stdio;
 import std.string;
 
@@ -131,6 +132,7 @@ public:
         outLife = life;
         if(timeout.killEntityIn == 0) 
         {
+            writeln("KILLING ENTITY").assumeWontThrow;
             outLife.alive = false; 
         }
     }
@@ -169,6 +171,7 @@ void realMain()
 
     auto entityMgr      = new EntityManager!DefaultEntityPolicy(compTypeMgr);
     scope(exit) { entityMgr.destroy(); }
+    entityMgr.startThreads();
     auto protoMgr       = new PrototypeManager(compTypeMgr, entityMgr);
 
     auto lifeProc        = new TestLifeProcess();

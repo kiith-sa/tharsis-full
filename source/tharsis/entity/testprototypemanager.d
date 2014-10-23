@@ -63,6 +63,7 @@ unittest
     compTypeMgr.registerComponentTypes!PhysicsComponent();
     compTypeMgr.lock();
     auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr);
+    entityMgr.startThreads();
     scope(exit) { entityMgr.destroy(); }
 
     PrototypeManager protoMgr;
