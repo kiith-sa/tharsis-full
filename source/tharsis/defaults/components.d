@@ -90,3 +90,26 @@ struct TimedTriggerMultiComponent
     /// ID of the trigger, used to determine what is being triggered.
     ushort triggerID;
 }
+
+
+/** Generates and returns a dummy component type with specified ID and data members.
+ *
+ * Used for benchmarking Tharsis itself..
+ */
+template dummyComponent(ushort id, Members)
+{
+    import std.string: format;
+
+    mixin(q{
+    struct Dummy%sComponent
+    {
+        enum ComponentTypeID = id;
+        Members members_;
+        alias members_ this;
+    }
+    }.format(id));
+
+    mixin(q{
+    alias dummyComponent = Dummy%sComponent;
+    }.format(id));
+}
