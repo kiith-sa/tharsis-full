@@ -12,12 +12,13 @@ import tharsis.entity.entityprototype;
 public import tharsis.entity.lifecomponent;
 import tharsis.entity.resourcemanager;
 
-/// Contains data about an entity to spawn.
-///
-/// Condition to trigger the spawn is represented by a TimedTriggerMultiComponent and
-/// may be represented by more trigger component types in future.
-///
-/// See_Also: SpawnerProcess
+/** Contains data about an entity to spawn.
+ *
+ * Condition to trigger the spawn is represented by a TimedTriggerMultiComponent and
+ * may be represented by more trigger component types in future.
+ *
+ * See_Also: SpawnerProcess
+ */
 @("defaultsComponent")
 struct SpawnerMultiComponent
 {
@@ -35,10 +36,11 @@ struct SpawnerMultiComponent
     /// Resource handle to the prototype of the entity to spawn.
     ResourceHandle!EntityPrototypeResource spawn;
 
-    /// Resource handle to a prototype storing all components to apply on top of those
-    /// in spawn, overriding or adding to components of spawn.
-    ///
-    /// Used to modify spawnees directly in the spawner source.
+    /** Resource handle to a prototype storing all components to apply on top of those
+     * in spawn, overriding or adding to components of spawn.
+     *
+     * Used to modify spawnees directly in the spawner source.
+     */
     @(PropertyName("override")) ResourceHandle!EntityPrototypeResource overrideComponents;
 
     /// Spawns are triggered by triggers matching this ID.
@@ -53,9 +55,10 @@ unittest
 }
 
 
-/// Triggers a spawn after specified time.
-///
-/// Also supports periodic spawns.
+/** Triggers a spawn after specified time.
+ *
+ * Also supports periodic spawns.
+ */
 @("defaultsComponent")
 struct TimedTriggerMultiComponent
 {
@@ -71,14 +74,16 @@ struct TimedTriggerMultiComponent
     enum minPreallocPerEntity = 0.3;
 
 
-    /// Time since the creation of the entity when to spawn.
-    ///
-    /// If periodic, this is the period.
+    /** Time since the creation of the entity when to spawn.
+     *
+     * If periodic, this is the period.
+     */
     float time = 1.0f;
-    /// The time left until the trigger is triggered.
-    ///
-    /// Can be set from the start to a different value to force the trigger to be
-    /// triggered earlier.
+    /** The time left until the trigger is triggered.
+     *
+     * Can be set from the start to a different value to force the trigger to be
+     * triggered earlier.
+     */
     float timeLeft = 1.0f;
     /// If true, spawns periodically, not just once.
     bool periodic = false;
