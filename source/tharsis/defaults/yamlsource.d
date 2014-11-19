@@ -92,24 +92,23 @@ public:
     ///          false if the Source isn't convertible to specified type.
     bool readTo(T)(out T target) @trusted nothrow
     {
-        // Hack to allow nothrow to work.
-        bool implementation(ref T target)
-        {
-            try                    { target = yaml_.as!(const T); }
-            catch(NodeException e)
-            {
-                if(logErrors_)
-                {
-                    errorLog_ ~= "YAMLSource.readTo(): %s: %s\n"
-                                 .format(e, e.msg);
-                }
-                return false;
-            }
-            return true;
-        }
+        import std.exception: assumeWontThrow;
 
-        alias bool delegate(ref T target) nothrow nothrowFunc;
-        return (cast(nothrowFunc)&implementation)(target);
+        try { target = yaml_.as!T; }
+        catch(NodeException e)
+        {
+            if(logErrors_)
+            {
+                errorLog_ ~= "YAMLSource.readTo(): %s: %s\n".format(e, e.msg)
+                                                            .assumeWontThrow;
+            }
+            return false;
+        }
+        catch(Exception e)
+        {
+            assert(false, "Unexpected exception in YAMLSource.readTo()");
+        }
+        return true;
     }
 
     /// Assign one YAMLSource to another.
