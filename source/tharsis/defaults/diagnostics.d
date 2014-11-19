@@ -59,6 +59,23 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
         }
         yaml["threads"] = YAMLNode(yamlThreads);
 
+        auto timeEstimator = YAMLNode(["totalProcessError"], 
+                                      [scheduler.timeEstimator.totalProcessError]);
+        with(scheduler.timeEstimator)
+        {
+            timeEstimator["totalProcessUnderestimate"]        = totalProcessUnderestimate;
+            timeEstimator["maxProcessUnderestimate"]          = maxProcessUnderestimate;
+            timeEstimator["averageProcessErrorRatio"]         = averageProcessErrorRatio;
+            timeEstimator["averageProcessUnderestimateRatio"] = averageProcessUnderestimateRatio;
+            timeEstimator["maxProcessUnderestimateRatio"]     = maxProcessUnderestimateRatio;
+            timeEstimator.collectionStyleHack = CollectionStyle.Block;
+        }
+        auto yamlScheduler = YAMLNode(["schedulingAlgorithm"], [scheduler.schedulingAlgorithm]);
+        yamlScheduler["approximate"]        = cast(bool)scheduler.approximate;
+        yamlScheduler["estimatedFrameTime"] = scheduler.estimatedFrameTime;
+        yamlScheduler["timeEstimator"]      = timeEstimator;
+        yaml["scheduler"] = yamlScheduler;
+
         yaml["pastEntityCount"]              = pastEntityCount;
         yaml["processCount"]                 = processCount;
         yaml["threadCount"]                  = threadCount;
@@ -66,6 +83,8 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
         yaml["pastComponentsPerEntityTotal"] = pastComponentsPerEntityTotal;
         yaml["processCallsTotal"]            = processCallsTotal;
         yaml["processCallsPerEntity"]        = processCallsPerEntity;
+        yaml["processDurationTotal"]         = processDurationTotal;
+        yaml["processDurationAverage"]       = processDurationAverage;
         yaml["pastMemoryAllocatedTotal"]     = pastMemoryAllocatedTotal;
         yaml["pastMemoryUsedTotal"]          = pastMemoryUsedTotal;
         yaml["pastMemoryAllocatedTotalMiB"]  = MBytes(pastMemoryAllocatedTotal).size;
