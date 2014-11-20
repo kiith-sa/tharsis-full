@@ -39,7 +39,7 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  * The SpawnerProcess processes SpawnerMultiComponents in combination with trigger
  * components (right now only TimedTriggerMultiComponent).
  *
- * To be able to spawn new entities, an entity needs both one or more 
+ * To be able to spawn new entities, an entity needs both one or more
  * SpawnerMultiComponents and some kind of trigger component/s (for now only
  * TimedTriggerMultiComponent).
  *
@@ -56,7 +56,7 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  *               x: 50.0
  *               y: 50.0
  *               z: 50.0
- * 
+ *
  * timedTriggerMulti:
  *     - time:      0.03
  *       timeLeft:  0.03
@@ -70,7 +70,7 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  *
  * In this example our entity has 2 spawner components, the first of which spawns
  * "test_data/entity1.yaml" without changing any of its components and the second spawns
- * "test_data/entity2.yaml", but overrides (example) "physics" (PhysicsComponent). 
+ * "test_data/entity2.yaml", but overrides (example) "physics" (PhysicsComponent).
  * (If there is no "physics" component in the spawned entity, it is added by the
  * override.) It also has 2 trigger components. The first triggers the spawner component
  * with triggerID 1 every 30 milliseconds while the second triggers the spawner
@@ -79,25 +79,25 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  * Relative properties:
  *
  * While we don't (yet) have any comphrehensive way to modify spawned entities other
- * than overriding, most games need at least some way to set properties of a spawnee 
+ * than overriding, most games need at least some way to set properties of a spawnee
  * relative to the spawner (for example, spawning an entity in a position relative to
  * the spawner).
  *
  * SpawnerProcess can recognize some properties as "relative", meaning the value of the
- * property in a spawnee is added to the value of the same property in the spawner 
+ * property in a spawnee is added to the value of the same property in the spawner
  * entity. To mark a property of a component as relative, add a string user-defined
- * attribute with value "relative" to the property. 
+ * attribute with value "relative" to the property.
  *
  * Example:
  * --------------------
  * struct PhysicsComponent
  * {
  *     enum ushort ComponentTypeID = userComponentTypeID!2;
- * 
+ *
  *     enum minPrealloc = 16384;
- * 
+ *
  *     enum minPreallocPerEntity = 1.0;
- * 
+ *
  *     // not relative
  *     float mass;
  *     // these 3 are relative
@@ -110,7 +110,7 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
 class SpawnerProcess(Policy)
 {
 private:
-    /** A function that takes an entity prototype and adds a new entity to the 
+    /** A function that takes an entity prototype and adds a new entity to the
      *  EntityManager (at the beginning of the next game update).
      */
     AddEntity addEntity_;
@@ -366,7 +366,7 @@ public:
             ++index;
         }
         futureTriggers = futureTriggers[0 .. index];
-    } 
+    }
 }
 
 
