@@ -368,3 +368,165 @@ public:
         futureTriggers = futureTriggers[0 .. index];
     } 
 }
+
+
+/** A dummy process type.
+ *
+ * ProcessSig must be a function/delegate and is used to specify the signature of the
+ * process() method of the DummyProcess.
+ */
+class DummyProcess(alias ProcessSig)
+{
+private:
+    // Overhead pattern between processed entities.
+    uint[] entityOverheadPattern_;
+
+    // Overhead pattern between frames.
+    uint[] frameOverheadPattern_;
+
+    // Index of the current entity among the entities processed by this process.
+    //
+    // (i.e. not *all entities*)
+    size_t entity_;
+
+    // Index of the current frame.
+    size_t frame_;
+
+    // process() does writes here to ensure they are not optimized away by the compiler.
+    ulong writeDummy_;
+
+public:
+    /** Construct a DummyProcess.
+     *
+     * Params:
+     *
+     * entityOverheadPattern = Overhead pattern between processed entitites.
+     *
+     *                         E.g. if this is [1, 2], the first entity will have
+     *                         'single overhead', the second will have 'doubled overhead',
+     *                         the third will again have 'single overhead', etc.
+     *
+     * frameOverheadPattern  = Overhead pattern between frames.
+     *
+     *                         E.g. if this is [1, 2, 4], the first frame will have
+     *                         'single overhead', the second will have 'doubled overhead',
+     *                         the third will have quadrupled overhead, the fourth will
+     *                         again have 'single overhead', etc.
+     */
+    this(uint[] entityOverheadPattern, uint[] frameOverheadPattern) @safe pure nothrow
+    {
+        entityOverheadPattern_ = entityOverheadPattern;
+        frameOverheadPattern_  = frameOverheadPattern;
+    }
+
+    /// Sets the current frame/entity
+    void preProcess() nothrow
+    {
+        ++frame_;
+        entity_ = 0;
+    }
+
+    import std.traits;
+    import std.string: format, join;
+
+
+    // pragma(msg, generateParams());
+
+
+    /// Simulates process overhead.
+    mixin(q{
+    void process(%s) nothrow
+    {
+        ++entity_;
+        // Determine how much overhead to simulate.
+        const overhead = entityOverheadPattern_[entity_ %% entityOverheadPattern_.length] *
+                         frameOverheadPattern_[frame_ %% frameOverheadPattern_.length];
+
+        import tharsis.entity.processtypeinfo;
+        alias paramInfo = processMethodParamInfo!(process);
+        // Simulating 'real' overhead including reading the past components and writing
+        // the future component.
+        foreach(i; 0 .. overhead)
+        {
+            import tharsis.util.typetuple;
+            // Iterate over all params
+            foreach(p; Sequence!(0, ParamTypes.length))
+            {
+                alias Info = paramInfo[p];
+                static if(Info.isComponent)
+                {
+                    // Past component - read and update writeDummy_
+                    static if(!isMutable!(Info.Component))
+                    {
+                        // Read the past component by bytes and update writeDummy_.
+
+                        // writeDummy_ is basically the sum of bytes of all past
+                        // components read so far
+                        foreach(b; 0 .. Info.Component.sizeof)
+                        {
+                            mixin(q{
+                            writeDummy_ += (cast(ubyte*)(&param%%s))[b];
+                            }.format(p));
+                        }
+                    }
+                    // Future component - write
+                    else
+                    {
+                        // Write to the future component using writeDummy_ as a base.
+                        foreach(b; 0 .. Info.Component.sizeof)
+                        {
+                            mixin(q{
+                            (cast(ubyte*)(&param%%s))[b] = (writeDummy_ + b) %%%% ubyte.max;
+                            }.format(p));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }.format(generateParams()));
+
+    // ProcessSig determines whether or not we write to any future component.
+    static if(hasFutureComponent!(process))
+    {
+        alias FutureComponent = FutureComponentType!process;
+    }
+
+private:
+    import tharsis.entity.processtypeinfo;
+
+    alias ParamTypes = ParameterTypeTuple!ProcessSig;
+
+    // Generate the parameter list of process()
+    static string generateParams()
+    {
+        alias ParamStorageClasses = ParameterStorageClassTuple!ProcessSig;
+        string[] parts;
+        foreach(i, Type; ParamTypes)
+        {
+            string part = "ParameterTypeTuple!ProcessSig[%s] param%s".format(i, i);
+            if(ParamStorageClasses[i] & ParameterStorageClass.out_)
+            {
+                part = "out " ~  part;
+            }
+            if(ParamStorageClasses[i] & ParameterStorageClass.ref_)
+            {
+                part = "ref " ~  part;
+            }
+            parts ~= part;
+        }
+        return parts.join(", ");
+    }
+}
+unittest
+{
+    struct Data
+    {
+        uint data;
+    }
+
+    alias Dummy1 = dummyComponent!(userComponentTypeID!1, Data);
+    alias Dummy2 = dummyComponent!(userComponentTypeID!2, Data);
+
+    auto process = new DummyProcess!((ref const Dummy1 a, ref const Dummy2 b) => 2)([1], [1]);
+}
