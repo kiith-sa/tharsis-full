@@ -41,7 +41,7 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
         auto yaml = YAMLNode(["componentTypes"], [YAMLNode(yamlTypes)]);
 
         YAMLNode[] yamlProcesses;
-        foreach(ref process; processes) if(!process.isNull)
+        foreach(ref process; processes)
         {
             auto yamlProcess = YAMLNode(["name"], [process.name]);
             yamlProcess["processCalls"]       = process.processCalls;
