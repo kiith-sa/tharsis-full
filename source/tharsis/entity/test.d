@@ -22,6 +22,7 @@ import tharsis.entity.entityprototype;
 import tharsis.entity.lifecomponent;
 import tharsis.entity.prototypemanager;
 import tharsis.entity.resourcemanager;
+import tharsis.entity.scheduler;
 import tharsis.defaults.components;
 import tharsis.defaults.processes;
 import tharsis.defaults.resources;
@@ -169,7 +170,8 @@ void realMain()
     compTypeMgr.lock();
 
 
-    auto entityMgr      = new EntityManager!DefaultEntityPolicy(compTypeMgr);
+    auto scheduler = new Scheduler(4);
+    auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr, scheduler);
     scope(exit) { entityMgr.destroy(); }
     entityMgr.startThreads();
     auto protoMgr       = new PrototypeManager(compTypeMgr, entityMgr);

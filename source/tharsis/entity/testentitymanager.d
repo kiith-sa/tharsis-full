@@ -10,6 +10,7 @@ import tharsis.entity.componenttypeinfo;
 import tharsis.entity.componenttypemanager;
 import tharsis.entity.entitymanager;
 import tharsis.entity.entitypolicy;
+import tharsis.entity.scheduler;
 
 
 private struct TestSource
@@ -95,7 +96,8 @@ unittest
     compTypeMgr.registerComponentTypes!TimeoutComponent();
     compTypeMgr.registerComponentTypes!PhysicsComponent();
     compTypeMgr.lock();
-    auto entityManager = new EntityManager!DefaultEntityPolicy(compTypeMgr);
+    auto scheduler = new Scheduler();
+    auto entityManager = new EntityManager!DefaultEntityPolicy(compTypeMgr, scheduler);
     scope(exit) { entityManager.destroy(); }
     entityManager.startThreads();
     auto process = new CopyProcess!TimeoutComponent();

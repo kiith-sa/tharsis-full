@@ -24,6 +24,7 @@ import tharsis.entity.entityprototype;
 import tharsis.entity.lifecomponent;
 import tharsis.entity.prototypemanager;
 import tharsis.entity.resourcemanager;
+import tharsis.entity.scheduler;
 import tharsis.util.testing;
 
 
@@ -132,7 +133,8 @@ unittest
     compTypeMgr.registerComponentTypes!PhysicsComponent();
     compTypeMgr.registerComponentTypes!HealthComponent();
     compTypeMgr.lock();
-    auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr);
+    auto scheduler = new Scheduler();
+    auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr, scheduler);
     scope(exit) { entityMgr.destroy(); }
     entityMgr.startThreads();
 
