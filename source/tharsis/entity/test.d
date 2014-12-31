@@ -174,7 +174,7 @@ void realMain()
     auto entityMgr = new EntityManager!DefaultEntityPolicy(compTypeMgr, scheduler);
     scope(exit) { entityMgr.destroy(); }
     entityMgr.startThreads();
-    auto protoMgr       = new PrototypeManager(compTypeMgr, entityMgr);
+    auto protoMgr = new PrototypeManager(compTypeMgr, entityMgr);
 
     auto lifeProc        = new TestLifeProcess();
     auto noOutProc       = new TestNoOutputProcess();

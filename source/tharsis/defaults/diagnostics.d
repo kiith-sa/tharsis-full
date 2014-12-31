@@ -101,6 +101,10 @@ YAMLNode toYAML(Policy)(ref const EntityManagerDiagnostics!Policy diagnostics)
 }
 unittest
 {
+    import std.stdio;
+    writeln("tharsis.defaults.diagnostics unittest");
+    scope(failure) writeln("tharsis.defaults.diagnostics unittest FAILED");
+
     const diagnostics = DefaultEntityManager.Diagnostics.init;
     auto yaml = toYAML(diagnostics);
 }
