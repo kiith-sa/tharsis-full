@@ -48,7 +48,7 @@ public:
                  ref const(Context) context) nothrow
     {
         outPhysics = physics;
-        const entity = context.currentEntity;
+        const entity = context.entity;
 
         // We should have 2 entities, 0 and 1, and process them in that order
         assert(nextID < 3 && entity.id == EntityID(nextID),

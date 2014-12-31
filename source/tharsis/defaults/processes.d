@@ -274,7 +274,7 @@ protected:
             auto typeInfo = &componentTypes[comp.typeID];
             // Relative does not work for MultiComponents.
             if(typeInfo.isMulti) { continue; }
-            auto spawnerComp = context.rawPastComponent(comp.typeID, context.currentEntity.id);
+            auto spawnerComp = context.rawPastComponent(comp.typeID, context.entity.id);
             // If the spawner doesn't have this component, we don't have anything to be
             // relative to so we just keep the unchanged value.
             if(spawnerComp.isNull) { continue; }
