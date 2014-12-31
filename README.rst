@@ -2,7 +2,7 @@
 Tharsis-full
 ============
 
-.. image:: https://travis-ci.org/kiith-sa/tharsis-full.svg?branch=master
+.. .. image:: https://travis-ci.org/kiith-sa/tharsis-full.svg?branch=master
 
 Tharsis-full contains various code needed to start a project using Tharsis, unlike
 Tharsis-core which only contains the "bare metal" core.
