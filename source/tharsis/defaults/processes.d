@@ -31,6 +31,7 @@ import tharsis.entity.entitypolicy;
 /// The default spawner process to be used with DefaultEntityManager.
 alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
 
+
 /** Reads SpawnerComponents and various triggers and spawns new entities.
  *
  * Can be derived to add support for more trigger component types.
@@ -44,37 +45,36 @@ alias DefaultSpawnerProcess = SpawnerProcess!DefaultEntityPolicy;
  * TimedTriggerMultiComponent).
  *
  * For example (with YAMLSource):
- * -------------------
- * spawnerMulti:
- *     - spawn:     test_data/entity1.yaml
- *       triggerID: 1
- *       override:
- *     - spawn:     test_data/entity2.yaml
- *       triggerID: 2
- *       override:
- *           physics:
- *               x: 50.0
- *               y: 50.0
- *               z: 50.0
  *
- * timedTriggerMulti:
- *     - time:      0.03
- *       timeLeft:  0.03
- *       periodic:  true
- *       triggerID: 1
- *     - time:      1.03
- *       timeLeft:  0.03
- *       periodic:  false
- *       triggerID: 2
- * -------------------
+ *     spawnerMulti:
+ *         - spawn:     test_data/entity1.yaml
+ *           triggerID: 1
+ *           override:
+ *         - spawn:     test_data/entity2.yaml
+ *           triggerID: 2
+ *           override:
+ *               physics:
+ *                   x: 50.0
+ *                   y: 50.0
+ *                   z: 50.0
+ *
+ *     timedTriggerMulti:
+ *         - time:      0.03
+ *           timeLeft:  0.03
+ *           periodic:  true
+ *           triggerID: 1
+ *         - time:      1.03
+ *           timeLeft:  0.03
+ *           periodic:  false
+ *           triggerID: 2
  *
  * In this example our entity has 2 spawner components, the first of which spawns
- * "test_data/entity1.yaml" without changing any of its components and the second spawns
- * "test_data/entity2.yaml", but overrides (example) "physics" (PhysicsComponent).
- * (If there is no "physics" component in the spawned entity, it is added by the
+ * `"test_data/entity1.yaml"` without changing any of its components and the second spawns
+ * `"test_data/entity2.yaml"`, but overrides (example) `"physics"` (`PhysicsComponent`).
+ * (If there is no `"physics"` component in the spawned entity, it is added by the
  * override.) It also has 2 trigger components. The first triggers the spawner component
- * with triggerID 1 every 30 milliseconds while the second triggers the spawner
- * component with triggerID 2 exactly once.
+ * with `triggerID == 1` every 30 milliseconds while the second triggers the spawner
+ * component with `triggerID == 2` exactly once.
  *
  * Relative properties:
  *
