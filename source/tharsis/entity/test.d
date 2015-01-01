@@ -21,6 +21,7 @@ import tharsis.entity.entitymanager;
 import tharsis.entity.entityprototype;
 import tharsis.entity.lifecomponent;
 import tharsis.entity.prototypemanager;
+import tharsis.entity.resource;
 import tharsis.entity.resourcemanager;
 import tharsis.entity.scheduler;
 import tharsis.defaults.components;

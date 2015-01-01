@@ -21,6 +21,7 @@ import tharsis.entity.entity;
 import tharsis.entity.entityid;
 import tharsis.entity.entitymanager;
 import tharsis.entity.entityprototype;
+import tharsis.entity.resource;
 import tharsis.entity.resourcemanager;
 
 import tharsis.util.pagedarray;
