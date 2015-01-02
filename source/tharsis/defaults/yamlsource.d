@@ -45,28 +45,26 @@ public:
         YAMLSource loadSource(string name, bool logErrors = false)
             @trusted nothrow
         {
-            // Hack to allow nothrow to work.
-            static YAMLSource implementation(string name, bool logErrors)
+            try
             {
-                try
-                {
-                    return YAMLSource(dyaml.loader.Loader(name).load());
-                }
-                catch(YAMLException e)
-                {
-                    auto result = YAMLSource(dyaml.node.Node(YAMLNull()));
-                    result.logErrors_ = logErrors;
-                    if(logErrors)
-                    {
-                        result.errorLog_ = "Loader.loadSource: %s: %s\n"
-                                           .format(e, e.msg);
-                    }
-                    return result;
-                }
+                return YAMLSource(dyaml.loader.Loader(name).load());
             }
-
-            alias YAMLSource function(string, bool) nothrow nothrowFunc;
-            return (cast(nothrowFunc)&implementation)(name, logErrors);
+            catch(YAMLException e)
+            {
+                auto result = YAMLSource(dyaml.node.Node(YAMLNull()));
+                result.logErrors_ = logErrors;
+                if(logErrors)
+                {
+                    import std.exception: assumeWontThrow;
+                    result.errorLog_ = "Loader.loadSource: %s: %s\n"
+                                       .format(e, e.msg).assumeWontThrow;
+                }
+                return result;
+            }
+            catch(Exception e)
+            {
+                assert(false, "Unexpected exception in Loader.loadSource");
+            }
         }
     }
 
