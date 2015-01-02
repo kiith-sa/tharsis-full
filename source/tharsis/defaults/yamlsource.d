@@ -100,9 +100,8 @@ public:
     string errorLog() @safe pure nothrow const
     {
         return logErrors_ ? errorLog_ :
-               "WARNING: Logging not enabled for this YAMLSource. Pass "
-               "logErrors == true to YAMLSource.Loader.loadSource to enable "
-               "logging\n";
+               "WARNING: Logging not enabled for this YAMLSource. Pass logErrors == true "
+               "to YAMLSource.Loader.loadSource to enable logging\n";
     }
 
     /** Read a value of type T to target.
