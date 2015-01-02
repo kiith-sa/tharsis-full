@@ -12,7 +12,30 @@ import dyaml.loader;
 import dyaml.node;
 import dyaml.exception;
 
-/// A Source to load entity components from based on YAML.
+
+/** A Source to load entity components from based on YAML.
+ *
+ * Note: To allow sane component properties by default, `enum` values can be loaded 
+ *       directly from strings and 2D/3D/4D `gl3n <https://github.com/Dav1dde/gl3n>`_
+ *       vectors can be loaded from 2/3/4-number sequences.
+ *
+ *       E.g.:
+ *
+ *       ```
+ *       value: EnumValue
+ *       ```
+ *
+ *       can be read as `Enum.EnumValue` if `Enum` is an `enum` type and we're
+ *       YAMLSource.readTo!Enum is called.
+ *
+ *       As for vectors, 
+ *
+ *       ```
+ *       vector: [2.0, 1.0, 3.5]
+ *       ```
+ *
+ *       can be read as `gl3n.linalg.vec3` or `gl3n.linalg.vec3d`.
+ */
 struct YAMLSource
 {
 private:
