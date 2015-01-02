@@ -6,7 +6,7 @@
 module tharsis.defaults.yamlsource;
 
 
-import std.string;
+import std.string: format, strip, split;
 
 import dyaml.loader;
 import dyaml.node;
@@ -91,14 +91,74 @@ public:
     {
         import std.exception: assumeWontThrow;
 
-        try { target = yaml_.as!T; }
+        void logError(string str)
+        {
+            if(logErrors_) { errorLog_ ~= "YAMLSource.readTo(): " ~ str; }
+        }
+
+        import std.conv: to, ConvException;
+        import std.traits: EnumMembers, fullyQualifiedName;
+
+        try
+        {
+            enum fullTName = fullyQualifiedName!T;
+            import std.algorithm: map, startsWith;
+            // TODO special handling for GFM vectors as well
+            // Builtin handling for vector types as they're *very* common in games and
+            // entity components.
+            static if(fullTName.startsWith("gl3n.linalg.Vector!"))
+            {
+                enum vectorParams = fullTName["gl3n.linalg.Vector!".length + 1 .. $ - 1]
+                                    .split(",")
+                                    .map!(s => s.strip);
+                mixin(q{
+                alias Coord = %s;
+                enum dims = %s;
+                }.format(vectorParams[0], vectorParams[1]));
+
+                // If it's an array, it may the special case vector format;
+                // any exceptions there are actual errors.
+                if(yaml_.length > 1)
+                {
+                    if(yaml_.length != dims)
+                    {
+                        logError("Unexpected number of vector dimensions; expected %s".format(dims));
+                        return false;
+                    }
+
+                    foreach(dim; 0 .. dims)
+                    {
+                        target.vector[dim] = yaml_[dim].as!Coord;
+                    }
+                    return true;
+                }
+
+                // Fallback to the default handling
+            }
+            // Builtin special handling for enums
+            else static if(is(T == enum))
+            {
+                try
+                {
+                    const str = yaml_.as!string;
+                    target = str.to!T;
+                    return true;
+                }
+                catch(ConvException e)
+                {
+                    logError("Invalid value of an enum: %s\nValid values are: %s"
+                            .format(e.msg, EnumMembers!T).assumeWontThrow);
+                    return false;
+                }
+                // Ignore; maybe it's really an enum, not a string
+                catch(NodeException e) { }
+            }
+
+            target = yaml_.as!T;
+        }
         catch(NodeException e)
         {
-            if(logErrors_)
-            {
-                errorLog_ ~= "YAMLSource.readTo(): %s: %s\n".format(e, e.msg)
-                                                            .assumeWontThrow;
-            }
+            logError("%s: %s\n".format(e, e.msg).assumeWontThrow);
             return false;
         }
         catch(Exception e)
