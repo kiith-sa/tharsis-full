@@ -16,7 +16,7 @@ import dyaml.exception;
 
 /** A Source to load entity components from based on YAML.
  *
- * Note: To allow sane component properties by default, `enum` values can be loaded 
+ * Note: To allow sane component properties by default, `enum` values can be loaded
  *       directly from strings and 2D/3D/4D `gl3n <https://github.com/Dav1dde/gl3n>`_
  *       vectors can be loaded from 2/3/4-number sequences.
  *
@@ -29,7 +29,7 @@ import dyaml.exception;
  *       can be read as `Enum.EnumValue` if `Enum` is an `enum` type and we're
  *       YAMLSource.readTo!Enum is called.
  *
- *       As for vectors, 
+ *       As for vectors,
  *
  *       ```
  *       vector: [2.0, 1.0, 3.5]
@@ -231,7 +231,7 @@ public:
         return implementation.assumeWontThrow();
     }
 
-    /** Get a nested Source from a 'mapping' Source.
+    /** Get a nested Source from a mapping Source.
      *
      * (Get a value from a Source that maps strings to Sources)
      *
