@@ -30,18 +30,16 @@ public:
     struct Loader
     {
     public:
-        /// Load a Source.
-        ///
-        /// Params: name      = Name to identify the source by
-        ///                     (e.g. a file name).
-        ///         logErrors = If true, any errors generated during the use of
-        ///                     the Source (such as loading errors, conversion
-        ///                     errors, etc.) should be logged, accessible
-        ///                     through the errorLog() method of Source.
-        ///
-        /// There is no requirement to load from actual files;
-        /// this may be implemented by loading from some archive file or
-        /// from memory.
+        /** Load a Source.
+         *
+         * Params: name      = Name to identify the source by (e.g. a file name).
+         *         logErrors = If true, any errors generated during the use of the Source
+         *                     (such as loading errors, conversion errors, etc.) should be
+         *                     logged, accessible through the errorLog() method of Source.
+         *
+         * There is no requirement to load from actual files; this may be implemented by
+         * loading from some archive file or from memory.
+         */
         YAMLSource loadSource(string name, bool logErrors = false)
             @trusted nothrow
         {
@@ -84,10 +82,11 @@ public:
                "logging\n";
     }
 
-    /// Read a value of type T to target.
-    ///
-    /// Returns: true if the value was successfully read.
-    ///          false if the Source isn't convertible to specified type.
+    /** Read a value of type T to target.
+     *
+     * Returns: `true` if the value was successfully read.
+     *          `false` if the Source isn't convertible to specified type.
+     */
     bool readTo(T)(out T target) @trusted nothrow
     {
         import std.exception: assumeWontThrow;
