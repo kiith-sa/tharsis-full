@@ -6,6 +6,7 @@
 module tharsis.defaults.yamlsource;
 
 
+import std.exception: assumeWontThrow;
 import std.string: format, strip, split;
 
 import dyaml.loader;
@@ -76,7 +77,6 @@ public:
                 result.logErrors_ = logErrors;
                 if(logErrors)
                 {
-                    import std.exception: assumeWontThrow;
                     result.errorLog_ = "Loader.loadSource: %s: %s\n"
                                        .format(e, e.msg).assumeWontThrow;
                 }
@@ -197,45 +197,38 @@ public:
         yaml_ = rhs.yaml_;
     }
 
-    /** Get a nested Source from a 'sequence' Source.
+    /** Foreach over all members of a sequence Source or over all keys of a mapping Source.
      *
-     * (Get a value from a Source that represents an array of Sources)
+     * Note:
      *
-     * Can only be called on if the Source is a sequence (see isSequence()).
-     *
-     * Params:  index  = Index of the Source to get in the sequence.
-     *          target = Target to read the Source to.
-     *
-     * Returns: true on success, false if index is out of range.
+     * Body of the foreach loop must be nothrow. Use std.exception.assumeWontThrow if
+     * necessary.
      */
-    bool getSequenceValue(size_t index, out YAMLSource target) @trusted nothrow
+    int opApply(int delegate(ref YAMLSource) nothrow dg) @trusted nothrow
     {
-        // Null works as a scalar, sequence and mapping at the same time; this way we
-        // can have e.g. empty sequences without explicit "[]".
-        if(yaml_.isNull) { return false; }
-        if(!yaml_.isSequence)
+        int result = 0;
+
+        if(yaml_.isNull) { return result; }
+
+        int implementation()
         {
-            assert(false, "Called getSequenceValue() on a non-sequence YAMLSource");
+            if(isSequence) foreach(ref dyaml.node.Node item; yaml_)
+            {
+                auto source = YAMLSource(item);
+                result = dg(source);
+                if(result) { break; }
+            }
+            else if(isMapping) foreach(ref dyaml.node.Node key, ref dyaml.node.Node value; yaml_)
+            {
+                auto source = YAMLSource(key);
+                result = dg(source);
+                if(result) { break; }
+            }
+            else assert(false, "opApply() called on a scalar YAMLSource");
+            return result;
         }
 
-        // Hack to allow nothrow to work.
-        bool implementation(size_t index, ref YAMLSource target)
-        {
-            if(index >= yaml_.length) { return false; }
-
-            try
-            {
-                alias ref dyaml.node.Node delegate(size_t) const constIdx;
-                target = YAMLSource((cast(constIdx)&yaml_.opIndex!size_t)(index));
-            }
-            catch(NodeException e)
-            {
-                assert(false, e.msg);
-            }
-            return true;
-        }
-        alias bool delegate(size_t, ref YAMLSource) nothrow nothrowFunc;
-        return (cast(nothrowFunc)&implementation)(index, target);
+        return implementation.assumeWontThrow();
     }
 
     /** Get a nested Source from a 'mapping' Source.
